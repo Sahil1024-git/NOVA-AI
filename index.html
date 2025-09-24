@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOVA - Web3 + AI</title>
+<title>NOVA AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+<link rel="icon" type="image/gif" href="images/Screenshot 2025-09-24 201423.png"> 
 <style>
 /* Universal Reset */
 * {
@@ -101,11 +101,11 @@ justify-content: space-between;
 align-items: center;
 padding: 20px 50px;
 backdrop-filter: blur(5px);
-/* 🔑 FIXED POSITIONING FOR FLUSH TOP */
+/* 🔑 Fixed position guarantees top edge alignment */
 position: fixed; 
 top: 0;
 left: 0;
-width: 100%; 
+width: 100%; /* Ensures it spans the whole width */
 background-color: var(--dark-bg); 
 z-index: 10;
 }
@@ -196,7 +196,6 @@ margin-bottom: 20px;
 color: white;
 text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
 margin-top: 0; 
-/* Reduced initial bottom margin, we'll use padding on hero-section */
 margin-bottom: 50px; 
 transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s, margin 0.5s;
 }
@@ -231,7 +230,8 @@ margin-top: 0;
 .ai-input-container {
 display: flex;
 width: 100%;
-max-width: 600px;
+/* 🔑 KEY CHANGE: Increased max-width to 800px to match the response paragraph */
+max-width: 800px; 
 background-color: var(--input-bg);
 border-radius: 30px;
 padding: 8px;
@@ -240,13 +240,12 @@ box-shadow: 0 0 20px rgba(138, 43, 226, 0.2);
 z-index: 5;
 margin-bottom: 20px; 
 transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.6s ease-out, margin 0.6s ease-out;
-/* 🌟 Default state relative to surrounding content */
 transform: translateY(0); 
 margin-top: 0;
 }
 
 .ai-input-container.move-down {
-/* 🌟 Pushes the input down below the AI response */
+/* Pushes the input down below the AI response */
 margin-top: 30px; 
 }
 
@@ -287,8 +286,6 @@ background: linear-gradient(to right, #9d4bff, #e8caff);
 
 /* AI Response Display Container - Now in the normal document flow */
 .ai-response-display {
-/* 🔑 KEY CHANGE: Remove absolute positioning to allow content to push it down */
-/* position: static or remove property - let the flow handle it */
 width: 90%;
 max-width: 1000px;
 z-index: 4; 
@@ -305,13 +302,14 @@ line-height: 1.5;
 color: white; 
 text-shadow: none; 
 
-opacity: 1; /* Always visible to handle the typewriter effect */
+opacity: 1; 
 transform: none;
-transition: none; /* No longer needed for fade-in, handled by JS */
+transition: none;
 white-space: pre-wrap; /* Preserve line breaks from AI response */
 text-align: left; /* Align response text to the left */
+/* Max width for the AI response paragraph */
 margin: 0 auto;
-max-width: 800px; /* Constraint width for readability */
+max-width: 800px; 
 }
 
 .ai-response-result.ai-response-result-visible {
@@ -351,6 +349,8 @@ margin-top: 30px;
 }
 
 .ai-input-container {
+/* 🔑 Key change for mobile responsiveness */
+max-width: 90%; 
 flex-direction: column;
 padding: 8px 8px 12px 8px; 
 transform: translateY(0); 
@@ -416,7 +416,7 @@ const userInput = document.getElementById('ai-user-input');
 const askAiBtn = document.getElementById('ask-ai-btn');
 const heroTitle = document.getElementById('hero-title');
 const heroButtons = document.getElementById('hero-buttons');
-const aiResponseDisplay = document.getElementById('ai-response-display'); // New reference for display container
+const aiResponseDisplay = document.getElementById('ai-response-display');
 const aiResponseResult = document.getElementById('ai-response-result');
 const aiInputContainer = document.querySelector('.ai-input-container'); 
 
@@ -424,12 +424,17 @@ const aiInputContainer = document.querySelector('.ai-input-container');
 const API_KEY = "AIzaSyD6mafRUb0kLHtpr1BQBLskt9KFa8qyvY0"; 
 const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
 
-// 🔑 NEW: Typewriter Effect Function
-function typewriterEffect(element, text, speed = 25) {
+// 🔑 UPDATED: Typewriter Effect Function with Dynamic Speed
+function typewriterEffect(element, text) {
     return new Promise(resolve => {
         let i = 0;
         element.innerHTML = ''; // Clear content first
         
+        // Dynamic speed calculation: 
+        // 15ms per character for short replies (<200 chars), 
+        // 5ms per character for long replies (>=200 chars).
+        const speed = text.length > 200 ? 5 : 15; 
+
         const timer = setInterval(() => {
             if (i < text.length) {
                 // Append the next character
@@ -515,8 +520,8 @@ const responseSpan = document.createElement('span');
 responseSpan.style.color = textColor;
 aiResponseResult.appendChild(responseSpan);
 
-// 🔑 Implement Typewriter Animation
-await typewriterEffect(responseSpan, displayText, 15); // Speed set to 15ms per character
+// 🔑 Call Typewriter Animation with dynamic speed logic built in
+await typewriterEffect(responseSpan, displayText); 
 
 askAiBtn.disabled = false;
 askAiBtn.textContent = 'ASK AI';
