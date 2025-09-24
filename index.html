@@ -9,6 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
 <style>
+/* Universal Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; 
+}
+
 :root {
 --dark-bg: #000000;
 --text-color: #e0e0e0;
@@ -21,8 +28,8 @@
 /* Improved body & main structure */
 body {
 background-color: var(--dark-bg);
-margin: 0;
-/* 💡 FONT CHANGE: Set Montserrat as the clean, legible base font */
+/* 🔑 ADDED: Ensure body margin is 0 */
+margin: 0; 
 font-family: 'Montserrat', sans-serif;
 color: var(--text-color);
 overflow-x: hidden;
@@ -41,8 +48,9 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 text-align: center;
-padding: 50px 20px;
-padding-top: 50px;
+/* 🔑 ADJUSTED: Increased top padding to compensate for hero-title margin removal */
+padding: 50px 20px; 
+padding-top: 150px; /* Adjusted from 50px to 150px (approx 50 + 100) */
 position: relative;
 z-index: 5;
     
@@ -94,7 +102,7 @@ justify-content: space-between;
 align-items: center;
 padding: 20px 50px;
 backdrop-filter: blur(5px);
-position: relative;
+/* position: relative; */
 z-index: 10;
 }
 
@@ -124,7 +132,7 @@ color: var(--text-color);
 text-decoration: none;
 font-weight: 500;
 transition: all 0.3s ease;
-margin: 0; 
+ 
 }
 
 .nav-link-btn {
@@ -185,7 +193,8 @@ line-height: 1.2;
 margin-bottom: 20px;
 color: white;
 text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-margin-top: 100px; 
+/* 🔑 REMOVED: This was causing the spacing issue by pushing content down */
+margin-top: 0; /* Changed from 100px to 0 */
 margin-bottom: 150px;
     
 transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s, margin 0.5s;
@@ -291,9 +300,10 @@ text-align: center;
 .ai-response-result {
 /* 💡 FONT CHANGE: Use Rajdhani for the large AI response */
 font-family: 'Rajdhani', sans-serif;
-font-size: 68px; /* Consistent with hero-title */
-font-weight: 700;
-line-height: 1.2;
+/* 🔑 UPDATED: Reduced font size for better readability of the response text */
+font-size: 32px; 
+font-weight: 500; /* Lighter weight for body text */
+line-height: 1.5; /* Better line spacing for body text */
 color: white; 
 text-shadow: none; 
 
@@ -327,8 +337,12 @@ padding: 15px 20px;
 margin: 15px 0;
 }
 /* 💡 FONT CHANGE: Adjusted size for mobile */
-.hero-title, .ai-response-result {
+.hero-title {
 font-size: 45px;
+}
+/* 🔑 UPDATED: Smaller font size for response on mobile */
+.ai-response-result {
+font-size: 24px;
 }
 
 .ai-response-display {
