@@ -48,11 +48,9 @@ justify-content: center;
 align-items: center;
 text-align: center;
 padding: 50px 20px;
-/* Reduced padding-top as we are using fixed navbar now and content flow is relative */
 padding-top: 50px; 
 position: relative;
 z-index: 5;
-    
 width: 100%;
 max-width: 1200px; 
 margin: 0 auto; 
@@ -101,11 +99,10 @@ justify-content: space-between;
 align-items: center;
 padding: 20px 50px;
 backdrop-filter: blur(5px);
-/* 🔑 Fixed position guarantees top edge alignment */
 position: fixed; 
 top: 0;
 left: 0;
-width: 100%; /* Ensures it spans the whole width */
+width: 100%; 
 background-color: var(--dark-bg); 
 z-index: 10;
 }
@@ -230,7 +227,6 @@ margin-top: 0;
 .ai-input-container {
 display: flex;
 width: 100%;
-/* 🔑 KEY CHANGE: Increased max-width to 800px to match the response paragraph */
 max-width: 800px; 
 background-color: var(--input-bg);
 border-radius: 30px;
@@ -284,8 +280,8 @@ box-shadow: 0 0 20px rgba(138, 43, 226, 0.8), 0 0 30px rgba(216, 180, 254, 0.6);
 background: linear-gradient(to right, #9d4bff, #e8caff);
 }
 
-/* AI Response Display Container - Now in the normal document flow */
-.ai-response-display {
+/* AI Response Display Container - Now the history container */
+.chat-history-container { 
 width: 90%;
 max-width: 1000px;
 z-index: 4; 
@@ -293,7 +289,7 @@ text-align: center;
 margin-top: 50px; /* Space above response */
 }
 
-/* AI Response Result - The text element */
+/* AI Response Result - The text element for EACH chat block */
 .ai-response-result {
 font-family: 'Rajdhani', sans-serif;
 font-size: 32px; 
@@ -301,19 +297,13 @@ font-weight: 500;
 line-height: 1.5; 
 color: white; 
 text-shadow: none; 
-
 opacity: 1; 
 transform: none;
 transition: none;
 white-space: pre-wrap; /* Preserve line breaks from AI response */
 text-align: left; /* Align response text to the left */
-/* Max width for the AI response paragraph */
-margin: 0 auto;
+margin: 30px auto; /* 🔑 IMPORTANT: Margin to separate chat blocks */
 max-width: 800px; 
-}
-
-.ai-response-result.ai-response-result-visible {
-/* Class removed as opacity is now always 1 */
 }
 
 /* Small query text above the large response */
@@ -322,7 +312,7 @@ font-size: 18px;
 font-weight: 500;
 color: var(--secondary-purple);
 opacity: 0.8;
-margin-bottom: 30px;
+margin-bottom: 10px; /* 🔑 Reduced margin for tighter grouping */
 display: block; 
 text-align: center;
 }
@@ -343,13 +333,12 @@ font-size: 45px;
 font-size: 24px;
 }
 
-.ai-response-display {
+.chat-history-container {
 /* Adjusted position for smaller screens */
 margin-top: 30px; 
 }
 
 .ai-input-container {
-/* 🔑 Key change for mobile responsiveness */
 max-width: 90%; 
 flex-direction: column;
 padding: 8px 8px 12px 8px; 
@@ -372,7 +361,7 @@ padding: 12px;
 </style>
 </head>
 <body>
-    
+    
 <div class="hero-background">
 <div class="glow-top"></div>
 <div class="glow-bottom"></div>
@@ -394,17 +383,15 @@ padding: 12px;
 
 <main class="hero-section">
 <h1 class="hero-title" id="hero-title">NOVA. Intelligence, unchained.</h1>
-    
-<div class="ai-response-display" id="ai-response-display">
-    <div class="ai-response-result" id="ai-response-result">
+    
+<div class="chat-history-container" id="chat-history-container">
     </div>
-</div>
 
 <div class="ai-input-container">
 <input type="text" id="ai-user-input" placeholder="Ask AI a question or type something..." autofocus>
 <button id="ask-ai-btn">ASK AI</button>
 </div>
-    
+    
 <div class="hero-buttons" id="hero-buttons">
 <a href="#" class="learn-more-btn">Learn More →</a> 
 </div>
@@ -412,129 +399,187 @@ padding: 12px;
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-const userInput = document.getElementById('ai-user-input');
-const askAiBtn = document.getElementById('ask-ai-btn');
-const heroTitle = document.getElementById('hero-title');
-const heroButtons = document.getElementById('hero-buttons');
-const aiResponseDisplay = document.getElementById('ai-response-display');
-const aiResponseResult = document.getElementById('ai-response-result');
-const aiInputContainer = document.querySelector('.ai-input-container'); 
+    const userInput = document.getElementById('ai-user-input');
+    const askAiBtn = document.getElementById('ask-ai-btn');
+    const heroTitle = document.getElementById('hero-title');
+    const heroButtons = document.getElementById('hero-buttons');
+    // 🔑 NEW ID: Container for all chat blocks
+    const chatHistoryContainer = document.getElementById('chat-history-container'); 
+    const aiInputContainer = document.querySelector('.ai-input-container'); 
+    // 🔑 NEW: Select the "New Chat" button (the first anchor tag in .nav-links)
+    const newChatButton = document.querySelector('.nav-links a:first-child'); 
 
-// 🔑 API KEY: Replaced with the key you provided.
-const API_KEY = "AIzaSyD6mafRUb0kLHtpr1BQBLskt9KFa8qyvY0"; 
-const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
+    // 🔑 API KEY: Replaced with the key you provided.
+    const API_KEY = "AIzaSyD6mafRUb0kLHtpr1BQBLskt9KFa8qyvY0"; 
+    const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
 
-// 🔑 UPDATED: Typewriter Effect Function with Dynamic Speed
-function typewriterEffect(element, text) {
-    return new Promise(resolve => {
-        let i = 0;
-        element.innerHTML = ''; // Clear content first
-        
-        // Dynamic speed calculation: 
-        // 15ms per character for short replies (<200 chars), 
-        // 5ms per character for long replies (>=200 chars).
-        const speed = text.length > 200 ? 5 : 15; 
+    // 🔑 NEW: Array to store the conversation history for multi-turn chats
+    let chatHistory = []; 
 
-        const timer = setInterval(() => {
-            if (i < text.length) {
-                // Append the next character
-                element.textContent += text.charAt(i);
-                i++;
-            } else {
-                clearInterval(timer);
-                resolve(); // Resolve the promise when complete
+    // Typewriter Effect Function with Dynamic Speed
+    function typewriterEffect(element, text) {
+        return new Promise(resolve => {
+            let i = 0;
+            element.innerHTML = ''; 
+            
+            const speed = text.length > 200 ? 5 : 15; 
+
+            const timer = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                    resolve(); 
+                }
+            }, speed);
+        });
+    }
+
+    // Function to call the API
+    async function getAIResponse(prompt) {
+        try {
+            // Prepare the contents array, including history for context
+            const contents = [
+                ...chatHistory, // Add existing history
+                { role: "user", parts: [{ text: prompt }] } // Add the new user prompt
+            ];
+
+            const response = await fetch(API_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: contents,
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                console.error("API Error:", data.error.message);
+                return { error: true, text: `API Error: ${data.error.message}. Please check your key's status.` };
             }
-        }, speed);
+
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!text) {
+                console.error("Response Empty:", data);
+                return { error: true, text: "AI could not generate a response. (Reason: Blocked, No content, or Quota issue.)" };
+            }
+
+            return { error: false, text: text };
+
+        } catch (e) {
+            console.error("Network Fetch Error:", e);
+            return { error: true, text: `Network Error: Could not connect to the API.` };
+        }
+    }
+
+    // 🔑 NEW: Function to create and append a new chat block
+    function createChatBlock(userQuery, placeholderText) {
+        // Create the main container for this query/response pair
+        const chatBlock = document.createElement('div');
+        chatBlock.className = 'ai-response-result';
+        
+        // Add the query text
+        const queryDiv = document.createElement('div');
+        queryDiv.className = 'ai-response-query';
+        queryDiv.textContent = `Query: ${userQuery}`;
+        chatBlock.appendChild(queryDiv);
+        
+        // Add the response span (for typewriter effect)
+        const responseSpan = document.createElement('span');
+        responseSpan.style.color = 'white'; // Default color
+        responseSpan.innerHTML = placeholderText; // Initial text (e.g., loading)
+        chatBlock.appendChild(responseSpan);
+        
+        // Append to the history container
+        chatHistoryContainer.appendChild(chatBlock);
+
+        // Scroll to the latest message
+        chatBlock.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+        return { chatBlock, responseSpan };
+    }
+
+    // Main interaction handler with animation logic
+    async function handleAskAI() {
+        const prompt = userInput.value.trim();
+        if (prompt === '') return;
+
+        const userQuery = prompt;
+        userInput.value = ''; // Clear input immediately
+
+        // 1. Start the hero text and buttons animation out (only once)
+        if (!heroTitle.classList.contains('fade-out-up')) {
+            heroTitle.classList.add('fade-out-up');
+            heroButtons.classList.add('fade-out-up');
+            aiInputContainer.classList.add('move-down');
+        }
+
+        // 2. Create the chat block and show loading state
+        const { responseSpan } = createChatBlock(userQuery, 'Connecting to NOVA AI...');
+
+        askAiBtn.disabled = true;
+        askAiBtn.textContent = 'Processing...';
+
+        // Get AI Response
+        const aiResult = await getAIResponse(userQuery);
+
+        let displayText = aiResult.text;
+        let textColor = aiResult.error ? 'red' : 'white'; 
+        
+        // 3. Update the content and perform typewriter animation
+        responseSpan.style.color = textColor;
+
+        // Call Typewriter Animation
+        await typewriterEffect(responseSpan, displayText); 
+
+        // 🔑 Update chat history for the next turn (only if successful)
+        if (!aiResult.error) {
+            chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
+            chatHistory.push({ role: "model", parts: [{ text: displayText }] });
+        }
+
+        askAiBtn.disabled = false;
+        askAiBtn.textContent = 'ASK AI';
+
+        // Ensure we scroll to the bottom after the typewriter is done
+        responseSpan.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    // 🔑 NEW: Function for the "New Chat" button
+    function handleNewChat() {
+        // Clear all previous queries and replies
+        chatHistoryContainer.innerHTML = ''; 
+        
+        // Reset chat history array for new session
+        chatHistory = []; 
+
+        // Reset the introductory elements
+        heroTitle.classList.remove('fade-out-up');
+        heroButtons.classList.remove('fade-out-up');
+        aiInputContainer.classList.remove('move-down');
+
+        userInput.value = '';
+        userInput.focus();
+    }
+
+    askAiBtn.addEventListener('click', handleAskAI);
+    
+    // Bind the "New Chat" functionality
+    newChatButton.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        handleNewChat();
     });
-}
 
-// Function to call the API
-async function getAIResponse(prompt) {
-try {
-const response = await fetch(API_ENDPOINT, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-contents: [{ role: "user", parts: [{ text: prompt }] }],
-})
-});
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
+            handleAskAI();
+        }
+    });
 
-const data = await response.json();
-
-if (data.error) {
-console.error("API Error:", data.error.message);
-return { error: true, text: `API Error: ${data.error.message}. Please check your key's status.` };
-}
-
-const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-if (!text) {
-console.error("Response Empty:", data);
-return { error: true, text: "AI could not generate a response. (Reason: Blocked, No content, or Quota issue.)" };
-}
-
-return { error: false, text: text };
-
-} catch (e) {
-console.error("Network Fetch Error:", e);
-return { error: true, text: `Network Error: Could not connect to the API.` };
-}
-}
-
-// Main interaction handler with animation logic
-async function handleAskAI() {
-const prompt = userInput.value.trim();
-if (prompt === '') return;
-
-const userQuery = prompt;
-
-// 1. Start the hero text and buttons animation out
-heroTitle.classList.add('fade-out-up');
-heroButtons.classList.add('fade-out-up');
-
-// Move the input field down
-aiInputContainer.classList.add('move-down');
-
-// Prepare the response display
-aiResponseDisplay.style.display = 'block';
-
-// Show loading state
-aiResponseResult.innerHTML = `
-<div class="ai-response-query">Query: ${userQuery}</div>
-<span style="font-size: 24px; font-weight: 500;">Connecting to NOVA AI...</span>
-`;
-
-askAiBtn.disabled = true;
-askAiBtn.textContent = 'Processing...';
-
-// Get AI Response
-const aiResult = await getAIResponse(userQuery);
-
-let displayText = aiResult.text;
-let textColor = aiResult.error ? 'red' : 'white'; 
-let queryHTML = `<div class="ai-response-query">Query: ${userQuery}</div>`;
-
-// 3. Update the content and perform typewriter animation
-aiResponseResult.innerHTML = queryHTML; // Put the query back
-const responseSpan = document.createElement('span');
-responseSpan.style.color = textColor;
-aiResponseResult.appendChild(responseSpan);
-
-// 🔑 Call Typewriter Animation with dynamic speed logic built in
-await typewriterEffect(responseSpan, displayText); 
-
-askAiBtn.disabled = false;
-askAiBtn.textContent = 'ASK AI';
-}
-
-askAiBtn.addEventListener('click', handleAskAI);
-
-userInput.addEventListener('keydown', (e) => {
-if (e.key === 'Enter') {
-e.preventDefault(); 
-handleAskAI();
-}
-});
 });
 </script>
 </body>
