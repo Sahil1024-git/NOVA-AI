@@ -28,7 +28,6 @@
 /* Improved body & main structure */
 body {
 background-color: var(--dark-bg);
-/* 🔑 ENSURED: Body margin is explicitly zero */
 margin: 0; 
 font-family: 'Montserrat', sans-serif;
 color: var(--text-color);
@@ -49,8 +48,8 @@ justify-content: center;
 align-items: center;
 text-align: center;
 padding: 50px 20px;
-/* 🔑 KEY CHANGE: Added extra padding to clear the now 'fixed' navbar */
-padding-top: calc(150px + 60px); 
+/* Reduced padding-top as we are using fixed navbar now and content flow is relative */
+padding-top: 50px; 
 position: relative;
 z-index: 5;
     
@@ -102,11 +101,11 @@ justify-content: space-between;
 align-items: center;
 padding: 20px 50px;
 backdrop-filter: blur(5px);
-/* 🔑 KEY CHANGE: Fixed position guarantees top edge alignment */
+/* 🔑 FIXED POSITIONING FOR FLUSH TOP */
 position: fixed; 
 top: 0;
 left: 0;
-width: 100%; /* Ensures it spans the whole width */
+width: 100%; 
 background-color: var(--dark-bg); 
 z-index: 10;
 }
@@ -118,7 +117,6 @@ font-size: 24px;
 font-weight: 700;
 color: white;
 text-shadow: 0 0 5px rgba(255,255,255,0.3);
-/* 💡 FONT CHANGE: Use Rajdhani for the logo for a technical feel */
 font-family: 'Rajdhani', sans-serif;
 }
 
@@ -190,18 +188,16 @@ background: linear-gradient(to right, #9d4bff, #e8caff);
 
 /* Hero Title */
 .hero-title {
-/* 💡 FONT CHANGE: Use Rajdhani for the main title for maximum impact */
 font-family: 'Rajdhani', sans-serif;
-font-size: 68px; /* Increased size slightly */
+font-size: 68px; 
 font-weight: 700;
 line-height: 1.2;
 margin-bottom: 20px;
 color: white;
 text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-/* Already set to 0 to prevent pushing down */
 margin-top: 0; 
-margin-bottom: 150px;
-    
+/* Reduced initial bottom margin, we'll use padding on hero-section */
+margin-bottom: 50px; 
 transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s, margin 0.5s;
 }
 
@@ -243,14 +239,15 @@ border: 1px solid var(--primary-purple);
 box-shadow: 0 0 20px rgba(138, 43, 226, 0.2);
 z-index: 5;
 margin-bottom: 20px; 
-transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.6s ease-out;
-/* 🌟 CHANGED: Moved up significantly for default state (from 80px) */
-transform: translateY(20px); 
+transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.6s ease-out, margin 0.6s ease-out;
+/* 🌟 Default state relative to surrounding content */
+transform: translateY(0); 
+margin-top: 0;
 }
 
 .ai-input-container.move-down {
-/* 🌟 CHANGED: Adjusted to match the new higher position (from 180px) */
-transform: translateY(120px); 
+/* 🌟 Pushes the input down below the AI response */
+margin-top: 30px; 
 }
 
 .ai-input-container:focus-within {
@@ -288,38 +285,37 @@ box-shadow: 0 0 20px rgba(138, 43, 226, 0.8), 0 0 30px rgba(216, 180, 254, 0.6);
 background: linear-gradient(to right, #9d4bff, #e8caff);
 }
 
-/* AI Response Display Container - positioned higher */
+/* AI Response Display Container - Now in the normal document flow */
 .ai-response-display {
-position: absolute;
-top: 50%; 
-left: 50%; 
-/* 🌟 CHANGED: Moved the entire response block higher (from -150px) */
-transform: translate(-50%, -210px); 
+/* 🔑 KEY CHANGE: Remove absolute positioning to allow content to push it down */
+/* position: static or remove property - let the flow handle it */
 width: 90%;
 max-width: 1000px;
 z-index: 4; 
 text-align: center;
+margin-top: 50px; /* Space above response */
 }
 
-/* AI Response Result - The large white text */
+/* AI Response Result - The text element */
 .ai-response-result {
-/* 💡 FONT CHANGE: Use Rajdhani for the large AI response */
 font-family: 'Rajdhani', sans-serif;
-/* 🔑 UPDATED: Reduced font size for better readability of the response text */
 font-size: 32px; 
-font-weight: 500; /* Lighter weight for body text */
-line-height: 1.5; /* Better line spacing for body text */
+font-weight: 500; 
+line-height: 1.5; 
 color: white; 
 text-shadow: none; 
 
-opacity: 0;
-transform: translateY(20px);
-transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+opacity: 1; /* Always visible to handle the typewriter effect */
+transform: none;
+transition: none; /* No longer needed for fade-in, handled by JS */
+white-space: pre-wrap; /* Preserve line breaks from AI response */
+text-align: left; /* Align response text to the left */
+margin: 0 auto;
+max-width: 800px; /* Constraint width for readability */
 }
 
 .ai-response-result.ai-response-result-visible {
-opacity: 1;
-transform: translateY(0);
+/* Class removed as opacity is now always 1 */
 }
 
 /* Small query text above the large response */
@@ -330,6 +326,7 @@ color: var(--secondary-purple);
 opacity: 0.8;
 margin-bottom: 30px;
 display: block; 
+text-align: center;
 }
 
 /* Responsive Adjustments */
@@ -341,30 +338,27 @@ padding: 15px 20px;
 .nav-links {
 margin: 15px 0;
 }
-/* 💡 FONT CHANGE: Adjusted size for mobile */
 .hero-title {
 font-size: 45px;
 }
-/* 🔑 UPDATED: Smaller font size for response on mobile */
 .ai-response-result {
 font-size: 24px;
 }
 
 .ai-response-display {
 /* Adjusted position for smaller screens */
-transform: translate(-50%, -100px); 
+margin-top: 30px; 
 }
 
 .ai-input-container {
 flex-direction: column;
 padding: 8px 8px 12px 8px; 
-/* 🌟 CHANGED: Mobile default position */
-transform: translateY(10px); 
+transform: translateY(0); 
 }
 
 .ai-input-container.move-down {
-/* 🌟 CHANGED: Mobile move down position */
-transform: translateY(90px); 
+/* Mobile move down position */
+margin-top: 50px; 
 }
 
 #ai-user-input {
@@ -401,6 +395,11 @@ padding: 12px;
 <main class="hero-section">
 <h1 class="hero-title" id="hero-title">Unleashing Decentralized Intelligence with NOVA.</h1>
     
+<div class="ai-response-display" id="ai-response-display">
+    <div class="ai-response-result" id="ai-response-result">
+    </div>
+</div>
+
 <div class="ai-input-container">
 <input type="text" id="ai-user-input" placeholder="Ask AI a question or type something..." autofocus>
 <button id="ask-ai-btn">ASK AI</button>
@@ -409,12 +408,6 @@ padding: 12px;
 <div class="hero-buttons" id="hero-buttons">
 <a href="#" class="learn-more-btn">Learn More →</a> 
 </div>
-
-<div class="ai-response-display" id="ai-response-display">
-<div class="ai-response-result" id="ai-response-result">
-</div>
-</div>
-
 </main>
 
 <script>
@@ -423,12 +416,32 @@ const userInput = document.getElementById('ai-user-input');
 const askAiBtn = document.getElementById('ask-ai-btn');
 const heroTitle = document.getElementById('hero-title');
 const heroButtons = document.getElementById('hero-buttons');
+const aiResponseDisplay = document.getElementById('ai-response-display'); // New reference for display container
 const aiResponseResult = document.getElementById('ai-response-result');
 const aiInputContainer = document.querySelector('.ai-input-container'); 
 
 // 🔑 API KEY: Replaced with the key you provided.
 const API_KEY = "AIzaSyD6mafRUb0kLHtpr1BQBLskt9KFa8qyvY0"; 
 const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
+
+// 🔑 NEW: Typewriter Effect Function
+function typewriterEffect(element, text, speed = 25) {
+    return new Promise(resolve => {
+        let i = 0;
+        element.innerHTML = ''; // Clear content first
+        
+        const timer = setInterval(() => {
+            if (i < text.length) {
+                // Append the next character
+                element.textContent += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(timer);
+                resolve(); // Resolve the promise when complete
+            }
+        }, speed);
+    });
+}
 
 // Function to call the API
 async function getAIResponse(prompt) {
@@ -477,20 +490,14 @@ heroButtons.classList.add('fade-out-up');
 // Move the input field down
 aiInputContainer.classList.add('move-down');
 
-// Ensure the response is reset and hidden for the new incoming animation
-aiResponseResult.classList.remove('ai-response-result-visible'); 
-
-userInput.value = '';
+// Prepare the response display
+aiResponseDisplay.style.display = 'block';
 
 // Show loading state
 aiResponseResult.innerHTML = `
 <div class="ai-response-query">Query: ${userQuery}</div>
 <span style="font-size: 24px; font-weight: 500;">Connecting to NOVA AI...</span>
 `;
-
-setTimeout(() => {
-aiResponseResult.classList.add('ai-response-result-visible'); 
-}, 100); 
 
 askAiBtn.disabled = true;
 askAiBtn.textContent = 'Processing...';
@@ -500,12 +507,16 @@ const aiResult = await getAIResponse(userQuery);
 
 let displayText = aiResult.text;
 let textColor = aiResult.error ? 'red' : 'white'; 
+let queryHTML = `<div class="ai-response-query">Query: ${userQuery}</div>`;
 
-// 3. Update the content with the final result
-aiResponseResult.innerHTML = `
-<div class="ai-response-query">Query: ${userQuery}</div>
-<span style="color:${textColor};">${displayText}</span>
-`;
+// 3. Update the content and perform typewriter animation
+aiResponseResult.innerHTML = queryHTML; // Put the query back
+const responseSpan = document.createElement('span');
+responseSpan.style.color = textColor;
+aiResponseResult.appendChild(responseSpan);
+
+// 🔑 Implement Typewriter Animation
+await typewriterEffect(responseSpan, displayText, 15); // Speed set to 15ms per character
 
 askAiBtn.disabled = false;
 askAiBtn.textContent = 'ASK AI';
