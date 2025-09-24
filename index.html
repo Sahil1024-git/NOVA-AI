@@ -28,7 +28,7 @@
 /* Improved body & main structure */
 body {
 background-color: var(--dark-bg);
-/* 🔑 ADDED: Ensure body margin is 0 */
+/* 🔑 ENSURED: Body margin is explicitly zero */
 margin: 0; 
 font-family: 'Montserrat', sans-serif;
 color: var(--text-color);
@@ -48,9 +48,9 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 text-align: center;
-/* 🔑 ADJUSTED: Increased top padding to compensate for hero-title margin removal */
-padding: 50px 20px; 
-padding-top: 150px; /* Adjusted from 50px to 150px (approx 50 + 100) */
+padding: 50px 20px;
+/* 🔑 KEY CHANGE: Added extra padding to clear the now 'fixed' navbar */
+padding-top: calc(150px + 60px); 
 position: relative;
 z-index: 5;
     
@@ -102,7 +102,12 @@ justify-content: space-between;
 align-items: center;
 padding: 20px 50px;
 backdrop-filter: blur(5px);
-/* position: relative; */
+/* 🔑 KEY CHANGE: Fixed position guarantees top edge alignment */
+position: fixed; 
+top: 0;
+left: 0;
+width: 100%; /* Ensures it spans the whole width */
+background-color: var(--dark-bg); 
 z-index: 10;
 }
 
@@ -132,7 +137,7 @@ color: var(--text-color);
 text-decoration: none;
 font-weight: 500;
 transition: all 0.3s ease;
- 
+margin: 0; 
 }
 
 .nav-link-btn {
@@ -193,8 +198,8 @@ line-height: 1.2;
 margin-bottom: 20px;
 color: white;
 text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-/* 🔑 REMOVED: This was causing the spacing issue by pushing content down */
-margin-top: 0; /* Changed from 100px to 0 */
+/* Already set to 0 to prevent pushing down */
+margin-top: 0; 
 margin-bottom: 150px;
     
 transition: opacity 0.5s ease-out, transform 0.5s ease-out, visibility 0.5s, margin 0.5s;
